@@ -1,0 +1,2 @@
+gradlew ideaModule
+pause
