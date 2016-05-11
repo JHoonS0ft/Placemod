@@ -31,7 +31,7 @@ public class Decorator implements IWorldGenerator {
     static boolean[] soil = new boolean[256]; // Ground soil blocks
     static boolean[] overlook = new boolean[256]; // Plants, stuff, web, fire, decorative, etc.
     static boolean[] liquid = new boolean[256]; // Liquid blocks
-    static Block[] vanillaBlocks = new Block[256];
+    static Block[] vanillaBlocks = new Block[256]; // Default vanilla blocks by classical indices
 
     /* Load/Generate mod settings */
     private static void configure(File file) {
