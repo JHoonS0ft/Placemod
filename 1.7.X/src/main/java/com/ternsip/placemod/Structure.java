@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
@@ -172,8 +173,16 @@ public class Structure {
         if (Decorator.preventCommandBlock) {
             blockReplaces[Block.getIdFromBlock(Blocks.command_block)] = Block.getIdFromBlock(Blocks.mossy_cobblestone);
         }
+        if (Decorator.preventMobSpawners) {
+            blockReplaces[Block.getIdFromBlock(Blocks.mob_spawner)] = Block.getIdFromBlock(Blocks.mossy_cobblestone);
+        }
 
         double lootChance = Decorator.lootChance;
+        String[] mobs = new String[]{"Enderman", "CaveSpider", "Chicken", "Creeper",
+                "Witch", "Slime", "Spider", "Sheep", "Blaze", "Bat", "PigZombie",
+                "Ghast", "Cow", "SnowMan", "LavaSlime", "Zombie", "Skeleton", "Pig"};
+
+        Block[] vanillaBlocks = Decorator.vanillaBlocks;
 
         for (int y = 0, index = 0; y < height; ++y) {
             for (int z = 0; z < length; ++z) {
@@ -186,10 +195,14 @@ public class Structure {
                         continue;
                     }
                     int blockID = blocks[index];
+                    Block block = null;
                     if (blockID > 0 && blockID < 256) {
                         blockID = blockReplaces[blockID];
+                        block = vanillaBlocks[blockID];
                     }
-                    Block block = Block.getBlockById(blockID);
+                    if (block == null) {
+                        block = Block.getBlockById(blockID);
+                    }
                     int meta = posture.getWorldMeta(block, blocksMetadata[index]);
                     int rx = blockPos.getX() - startChunkX * 16;
                     int ry = blockPos.getY();
@@ -207,9 +220,15 @@ public class Structure {
                     //chunk.setModified(true);
                     //world.setBlockState(blockPos, state, 2);
                     TileEntity blockTile = world.getTileEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-                    if (blockTile != null && blockTile instanceof TileEntityChest && lootChance >= random.nextDouble()) {
-                        ChestGenHooks info = lootTables.get(Math.abs(random.nextInt() % lootTables.size()));
-                        WeightedRandomChestContent.generateChestContents(random, info.getItems(random), (TileEntityChest) blockTile, info.getCount(random));
+                    if (blockTile != null ) {
+                        if (blockTile instanceof TileEntityChest && lootChance >= random.nextDouble()) {
+                            ChestGenHooks info = lootTables.get(Math.abs(random.nextInt() % lootTables.size()));
+                            WeightedRandomChestContent.generateChestContents(random, info.getItems(random), (TileEntityChest) blockTile, info.getCount(random));
+                        }
+                        if (blockTile instanceof TileEntityMobSpawner) {
+                            TileEntityMobSpawner spawner = (TileEntityMobSpawner) blockTile;
+                            spawner.func_145881_a().setEntityName(mobs[Math.abs(random.nextInt()) % mobs.length]);
+                        }
                     }
                 }
             }

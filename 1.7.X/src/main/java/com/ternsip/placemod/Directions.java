@@ -25,8 +25,8 @@ public class Directions {
     private static final Map<BlockType, HashMap<Integer, Integer>> directionToMeta = new HashMap<BlockType, HashMap<Integer, Integer>>();
     private static final Map<BlockType, Integer> masks = new HashMap<BlockType, Integer>();
 
-    public static enum BlockType {
-        LOG, DISPENSER, BED, RAIL, RAIL_POWERED, TORCH, STAIR, CHEST, SIGNPOST,
+    public enum BlockType {
+        LOG, DISPENSER, BED, RAIL_NORMAL, RAIL_CURVE, RAIL_ASC, RAIL_POWERED, RAIL_POWERED_ASC, TORCH, STAIR, CHEST, SIGNPOST,
         DOOR, LEVER, BUTTON, REDSTONE_REPEATER, TRAPDOOR, VINE, SKULL, ANVIL,
         MUSHROOM, MUSHROOM_CAP_CORNER, MUSHROOM_CAP_SIDE, IDLE
     }
@@ -36,10 +36,10 @@ public class Directions {
             return BlockType.BED;
         }
         if (block instanceof BlockRail) {
-            return BlockType.RAIL;
+            return (meta < 0x2) ? BlockType.RAIL_NORMAL : (meta < 0x6) ? BlockType.RAIL_ASC : BlockType.RAIL_CURVE;
         }
         if (block instanceof BlockRailPowered || block instanceof BlockRailDetector) {
-            return BlockType.RAIL_POWERED;
+            return (meta < 0x2) ? BlockType.RAIL_POWERED : BlockType.RAIL_POWERED_ASC;
         }
         if (block instanceof BlockStairs) {
             return BlockType.STAIR;
@@ -84,9 +84,13 @@ public class Directions {
             return BlockType.LEVER;
         }
         if (block instanceof BlockHugeMushroom) {
-            return (meta == 0x0 || meta > 0x9) ? BlockType.MUSHROOM : (meta % 0x2 == 0 ? BlockType.MUSHROOM_CAP_SIDE : BlockType.MUSHROOM_CAP_CORNER);
+            return (meta == 0x0 || meta > 0x9 || meta == 0x5) ? BlockType.MUSHROOM : (meta % 0x2 == 0 ? BlockType.MUSHROOM_CAP_SIDE : BlockType.MUSHROOM_CAP_CORNER);
         }
         return BlockType.IDLE;
+    }
+
+    static boolean isDoubleDirected(BlockType blockType) {
+        return blockType == BlockType.MUSHROOM_CAP_CORNER || blockType == BlockType.RAIL_CURVE;
     }
 
     static Integer getDirection(int meta, BlockType blockType) {
@@ -183,24 +187,33 @@ public class Directions {
         metaToDir = new HashMap<Integer, Integer>();
         metaToDir.put(0x0, NORTH);
         metaToDir.put(0x1, EAST);
+        addMappings(metaToDir, BlockType.RAIL_NORMAL, 0xF);
+
+        metaToDir = new HashMap<Integer, Integer>();
         metaToDir.put(0x2, EAST);
         metaToDir.put(0x3, WEST);
         metaToDir.put(0x4, NORTH);
         metaToDir.put(0x5, SOUTH);
+        addMappings(metaToDir, BlockType.RAIL_ASC, 0xF);
+
+        metaToDir = new HashMap<Integer, Integer>();
         metaToDir.put(0x6, EAST);
-        metaToDir.put(0x7, WEST);
+        metaToDir.put(0x7, SOUTH);
         metaToDir.put(0x8, WEST);
-        metaToDir.put(0x9, EAST);
-        addMappings(metaToDir, BlockType.RAIL, 0xF);
+        metaToDir.put(0x9, NORTH);
+        addMappings(metaToDir, BlockType.RAIL_CURVE, 0xF);
 
         metaToDir = new HashMap<Integer, Integer>();
         metaToDir.put(0x0, NORTH);
         metaToDir.put(0x1, EAST);
+        addMappings(metaToDir, BlockType.RAIL_POWERED, 0x7);
+
+        metaToDir = new HashMap<Integer, Integer>();
         metaToDir.put(0x2, EAST);
         metaToDir.put(0x3, WEST);
         metaToDir.put(0x4, NORTH);
         metaToDir.put(0x5, SOUTH);
-        addMappings(metaToDir, BlockType.RAIL_POWERED, 0x7);
+        addMappings(metaToDir, BlockType.RAIL_POWERED_ASC, 0x7);
 
         metaToDir = new HashMap<Integer, Integer>();
         metaToDir.put(0x0, EAST);
@@ -260,10 +273,10 @@ public class Directions {
         addMappings(metaToDir, BlockType.MUSHROOM, 0xF);
 
         metaToDir = new HashMap<Integer, Integer>();
-        metaToDir.put(0x1, EAST);
-        metaToDir.put(0x3, SOUTH);
-        metaToDir.put(0x7, NORTH);
-        metaToDir.put(0x9, WEST);
+        metaToDir.put(0x1, WEST);
+        metaToDir.put(0x3, NORTH);
+        metaToDir.put(0x7, SOUTH);
+        metaToDir.put(0x9, EAST);
         addMappings(metaToDir, BlockType.MUSHROOM_CAP_CORNER, 0xF);
 
         metaToDir = new HashMap<Integer, Integer>();

@@ -27,9 +27,11 @@ public class Decorator implements IWorldGenerator {
     static double roughnessFactor = 1.0; // Multiplier of minimal acceptable roughness
     static double lootChance = 0.25; // Chest loot chance [0..1]
     static int forceLift = 0; // Pull out structure from the ground and lift up (recommended 0)
+    static boolean preventMobSpawners = false; // Prevent mobspawners for spawning
     static boolean[] soil = new boolean[256]; // Ground soil blocks
     static boolean[] overlook = new boolean[256]; // Plants, stuff, web, fire, decorative, etc.
     static boolean[] liquid = new boolean[256]; // Liquid blocks
+    static Block[] vanillaBlocks = new Block[256];
 
     /* Load/Generate mod settings */
     private static void configure(File file) {
@@ -50,6 +52,7 @@ public class Decorator implements IWorldGenerator {
                 roughnessFactor = Double.parseDouble(config.getProperty("ROUGHNESS_FACTOR", Double.toString(roughnessFactor)));
                 lootChance = Double.parseDouble(config.getProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance)));
                 forceLift = (int) Double.parseDouble(config.getProperty("FORCE_LIFT", Double.toString(forceLift)));
+                preventMobSpawners = Boolean.parseBoolean(config.getProperty("PREVENT_MOB_SPAWNERS", Boolean.toString(preventMobSpawners)));
                 fis.close();
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -66,6 +69,7 @@ public class Decorator implements IWorldGenerator {
             config.setProperty("ROUGHNESS_FACTOR", Double.toString(roughnessFactor));
             config.setProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance));
             config.setProperty("FORCE_LIFT", Integer.toString(forceLift));
+            config.setProperty("PREVENT_MOB_SPAWNERS", Boolean.toString(preventMobSpawners));
             config.store(fos, null);
             fos.close();
         } catch (IOException ioe) {
@@ -193,8 +197,8 @@ public class Decorator implements IWorldGenerator {
             curX += posture.getSizeX() + 1;
             maxZ = Math.max(maxZ, posture.getSizeZ());
             posture.shift(sx, 0, sz);
+            long startTime = System.currentTimeMillis();
             try {
-                long startTime = System.currentTimeMillis();
                 Calibrator calibrator = new Calibrator(world, posture);
                 posture.shift(0, calibrator.calibrate(structure, seed), 0);
                 structure.paste(world, posture, random.nextLong());
@@ -209,6 +213,7 @@ public class Decorator implements IWorldGenerator {
                         .add("FLIP", "[X=" + posture.isFlipX() + ";Y=" + posture.isFlipY() + ";Z=" + posture.isFlipZ() + "]")
                         .print();
             } catch (IOException ioe) {
+                long spentTime = System.currentTimeMillis() - startTime;
                 new Report().add("CAN'T PASTE", structure.schematicFile.getPath())
                         .add("ERROR",  ioe.getMessage())
                         .add("POS", "[X=" + posture.getPosX() + ";Y=" + posture.getPosY() + ";Z=" + posture.getPosZ() + "]")
@@ -216,6 +221,7 @@ public class Decorator implements IWorldGenerator {
                         .add("BIOME", Biome.Style.valueOf(structure.flags.getInteger("Biome")).name)
                         .add("ROTATE", "[X=" + posture.getRotateX() + ";Y=" + posture.getRotateY() + ";Z=" + posture.getRotateZ() + "]")
                         .add("FLIP", "[X=" + posture.isFlipX() + ";Y=" + posture.isFlipY() + ";Z=" + posture.isFlipZ() + "]")
+                        .add("SPENT TIME", new DecimalFormat("###0.00").format(spentTime / 1000.0) + "s")
                         .print();
             }
         }
@@ -263,6 +269,263 @@ public class Decorator implements IWorldGenerator {
         liquid[Block.getIdFromBlock(Blocks.ice)] = true;
         liquid[Block.getIdFromBlock(Blocks.lava)] = true;
         liquid[Block.getIdFromBlock(Blocks.flowing_lava)] = true;
+
+        vanillaBlocks[0] = Blocks.air;
+        vanillaBlocks[1] = Blocks.stone;
+        vanillaBlocks[2] = Blocks.grass;
+        vanillaBlocks[3] = Blocks.dirt;
+        vanillaBlocks[4] = Blocks.cobblestone;
+        vanillaBlocks[5] = Blocks.planks;
+        vanillaBlocks[6] = Blocks.sapling;
+        vanillaBlocks[7] = Blocks.bedrock;
+        vanillaBlocks[8] = Blocks.flowing_water;
+        vanillaBlocks[9] = Blocks.water;
+        vanillaBlocks[10] = Blocks.flowing_lava;
+        vanillaBlocks[11] = Blocks.lava;
+        vanillaBlocks[12] = Blocks.sand;
+        vanillaBlocks[13] = Blocks.gravel;
+        vanillaBlocks[14] = Blocks.gold_ore;
+        vanillaBlocks[15] = Blocks.iron_ore;
+        vanillaBlocks[16] = Blocks.coal_ore;
+        vanillaBlocks[17] = Blocks.log;
+        vanillaBlocks[18] = Blocks.leaves;
+        vanillaBlocks[19] = Blocks.sponge;
+        vanillaBlocks[20] = Blocks.glass;
+        vanillaBlocks[21] = Blocks.lapis_ore;
+        vanillaBlocks[22] = Blocks.lapis_block;
+        vanillaBlocks[23] = Blocks.dispenser;
+        vanillaBlocks[24] = Blocks.sandstone;
+        vanillaBlocks[25] = Blocks.noteblock;
+        vanillaBlocks[26] = Blocks.bed;
+        vanillaBlocks[27] = Blocks.golden_rail;
+        vanillaBlocks[28] = Blocks.detector_rail;
+        vanillaBlocks[29] = Blocks.sticky_piston;
+        vanillaBlocks[30] = Blocks.web;
+        vanillaBlocks[31] = Blocks.tallgrass;
+        vanillaBlocks[32] = Blocks.deadbush;
+        vanillaBlocks[33] = Blocks.piston;
+        vanillaBlocks[34] = Blocks.piston_head;
+        vanillaBlocks[35] = Blocks.wool;
+        vanillaBlocks[36] = Blocks.piston_extension;
+        vanillaBlocks[37] = Blocks.yellow_flower;
+        vanillaBlocks[38] = Blocks.red_flower;
+        vanillaBlocks[39] = Blocks.brown_mushroom;
+        vanillaBlocks[40] = Blocks.red_mushroom;
+        vanillaBlocks[41] = Blocks.gold_block;
+        vanillaBlocks[42] = Blocks.iron_block;
+        vanillaBlocks[43] = Blocks.double_stone_slab;
+        vanillaBlocks[44] = Blocks.stone_slab;
+        vanillaBlocks[45] = Blocks.brick_block;
+        vanillaBlocks[46] = Blocks.tnt;
+        vanillaBlocks[47] = Blocks.bookshelf;
+        vanillaBlocks[48] = Blocks.mossy_cobblestone;
+        vanillaBlocks[49] = Blocks.obsidian;
+        vanillaBlocks[50] = Blocks.torch;
+        vanillaBlocks[51] = Blocks.fire;
+        vanillaBlocks[52] = Blocks.mob_spawner;
+        vanillaBlocks[53] = Blocks.oak_stairs;
+        vanillaBlocks[54] = Blocks.chest;
+        vanillaBlocks[55] = Blocks.redstone_wire;
+        vanillaBlocks[56] = Blocks.diamond_ore;
+        vanillaBlocks[57] = Blocks.diamond_block;
+        vanillaBlocks[58] = Blocks.crafting_table;
+        vanillaBlocks[59] = Blocks.wheat;
+        vanillaBlocks[60] = Blocks.farmland;
+        vanillaBlocks[61] = Blocks.furnace;
+        vanillaBlocks[62] = Blocks.lit_furnace;
+        vanillaBlocks[63] = Blocks.standing_sign;
+        vanillaBlocks[64] = Blocks.wooden_door;
+        vanillaBlocks[65] = Blocks.ladder;
+        vanillaBlocks[66] = Blocks.rail;
+        vanillaBlocks[67] = Blocks.stone_stairs;
+        vanillaBlocks[68] = Blocks.wall_sign;
+        vanillaBlocks[69] = Blocks.lever;
+        vanillaBlocks[70] = Blocks.stone_pressure_plate;
+        vanillaBlocks[71] = Blocks.iron_door;
+        vanillaBlocks[72] = Blocks.wooden_pressure_plate;
+        vanillaBlocks[73] = Blocks.redstone_ore;
+        vanillaBlocks[74] = Blocks.lit_redstone_ore;
+        vanillaBlocks[75] = Blocks.unlit_redstone_torch;
+        vanillaBlocks[76] = Blocks.redstone_torch;
+        vanillaBlocks[77] = Blocks.stone_button;
+        vanillaBlocks[78] = Blocks.snow_layer;
+        vanillaBlocks[79] = Blocks.ice;
+        vanillaBlocks[80] = Blocks.snow;
+        vanillaBlocks[81] = Blocks.cactus;
+        vanillaBlocks[82] = Blocks.clay;
+        vanillaBlocks[83] = Blocks.reeds;
+        vanillaBlocks[84] = Blocks.jukebox;
+        vanillaBlocks[85] = Blocks.fence;
+        vanillaBlocks[86] = Blocks.pumpkin;
+        vanillaBlocks[87] = Blocks.netherrack;
+        vanillaBlocks[88] = Blocks.soul_sand;
+        vanillaBlocks[89] = Blocks.glowstone;
+        vanillaBlocks[90] = Blocks.portal;
+        vanillaBlocks[91] = Blocks.lit_pumpkin;
+        vanillaBlocks[92] = Blocks.cake;
+        vanillaBlocks[93] = Blocks.unpowered_repeater;
+        vanillaBlocks[94] = Blocks.powered_repeater;
+        vanillaBlocks[95] = Blocks.stained_glass;
+        vanillaBlocks[96] = Blocks.trapdoor;
+        vanillaBlocks[97] = Blocks.monster_egg;
+        vanillaBlocks[98] = Blocks.stonebrick;
+        vanillaBlocks[99] = Blocks.brown_mushroom_block;
+        vanillaBlocks[100] = Blocks.red_mushroom_block;
+        vanillaBlocks[101] = Blocks.iron_bars;
+        vanillaBlocks[102] = Blocks.glass_pane;
+        vanillaBlocks[103] = Blocks.melon_block;
+        vanillaBlocks[104] = Blocks.pumpkin_stem;
+        vanillaBlocks[105] = Blocks.melon_stem;
+        vanillaBlocks[106] = Blocks.vine;
+        vanillaBlocks[107] = Blocks.fence_gate;
+        vanillaBlocks[108] = Blocks.brick_stairs;
+        vanillaBlocks[109] = Blocks.stone_brick_stairs;
+        vanillaBlocks[110] = Blocks.mycelium;
+        vanillaBlocks[111] = Blocks.waterlily;
+        vanillaBlocks[112] = Blocks.nether_brick;
+        vanillaBlocks[113] = Blocks.nether_brick_fence;
+        vanillaBlocks[114] = Blocks.nether_brick_stairs;
+        vanillaBlocks[115] = Blocks.nether_wart;
+        vanillaBlocks[116] = Blocks.enchanting_table;
+        vanillaBlocks[117] = Blocks.brewing_stand;
+        vanillaBlocks[118] = Blocks.cauldron;
+        vanillaBlocks[119] = Blocks.end_portal;
+        vanillaBlocks[120] = Blocks.end_portal_frame;
+        vanillaBlocks[121] = Blocks.end_stone;
+        vanillaBlocks[122] = Blocks.dragon_egg;
+        vanillaBlocks[123] = Blocks.redstone_lamp;
+        vanillaBlocks[124] = Blocks.lit_redstone_lamp;
+        vanillaBlocks[125] = Blocks.double_wooden_slab;
+        vanillaBlocks[126] = Blocks.wooden_slab;
+        vanillaBlocks[127] = Blocks.cocoa;
+        vanillaBlocks[128] = Blocks.sandstone_stairs;
+        vanillaBlocks[129] = Blocks.emerald_ore;
+        vanillaBlocks[130] = Blocks.ender_chest;
+        vanillaBlocks[131] = Blocks.tripwire_hook;
+        vanillaBlocks[132] = Blocks.tripwire;
+        vanillaBlocks[133] = Blocks.emerald_block;
+        vanillaBlocks[134] = Blocks.spruce_stairs;
+        vanillaBlocks[135] = Blocks.birch_stairs;
+        vanillaBlocks[136] = Blocks.jungle_stairs;
+        vanillaBlocks[137] = Blocks.command_block;
+        vanillaBlocks[138] = Blocks.beacon;
+        vanillaBlocks[139] = Blocks.cobblestone_wall;
+        vanillaBlocks[140] = Blocks.flower_pot;
+        vanillaBlocks[141] = Blocks.carrots;
+        vanillaBlocks[142] = Blocks.potatoes;
+        vanillaBlocks[143] = Blocks.wooden_button;
+        vanillaBlocks[144] = Blocks.skull;
+        vanillaBlocks[145] = Blocks.anvil;
+        vanillaBlocks[146] = Blocks.trapped_chest;
+        vanillaBlocks[147] = Blocks.light_weighted_pressure_plate;
+        vanillaBlocks[148] = Blocks.heavy_weighted_pressure_plate;
+        vanillaBlocks[149] = Blocks.unpowered_comparator;
+        vanillaBlocks[150] = Blocks.powered_comparator;
+        vanillaBlocks[151] = Blocks.daylight_detector;
+        vanillaBlocks[152] = Blocks.redstone_block;
+        vanillaBlocks[153] = Blocks.quartz_ore;
+        vanillaBlocks[154] = Blocks.hopper;
+        vanillaBlocks[155] = Blocks.quartz_block;
+        vanillaBlocks[156] = Blocks.quartz_stairs;
+        vanillaBlocks[157] = Blocks.activator_rail;
+        vanillaBlocks[158] = Blocks.dropper;
+        vanillaBlocks[159] = Blocks.stained_hardened_clay;
+        vanillaBlocks[160] = Blocks.stained_glass_pane;
+        vanillaBlocks[161] = Blocks.leaves2;
+        vanillaBlocks[162] = Blocks.log2;
+        vanillaBlocks[163] = Blocks.acacia_stairs;
+        vanillaBlocks[164] = Blocks.dark_oak_stairs;
+        vanillaBlocks[165] = null;
+        vanillaBlocks[166] = null;
+        vanillaBlocks[167] = null;
+        vanillaBlocks[168] = null;
+        vanillaBlocks[169] = null;
+        vanillaBlocks[170] = Blocks.hay_block;
+        vanillaBlocks[171] = Blocks.carpet;
+        vanillaBlocks[172] = Blocks.hardened_clay;
+        vanillaBlocks[173] = Blocks.coal_block;
+        vanillaBlocks[174] = Blocks.packed_ice;
+        vanillaBlocks[175] = Blocks.double_plant;
+        vanillaBlocks[176] = null;
+        vanillaBlocks[177] = null;
+        vanillaBlocks[178] = null;
+        vanillaBlocks[179] = null;
+        vanillaBlocks[180] = null;
+        vanillaBlocks[181] = null;
+        vanillaBlocks[182] = null;
+        vanillaBlocks[183] = null;
+        vanillaBlocks[184] = null;
+        vanillaBlocks[185] = null;
+        vanillaBlocks[186] = null;
+        vanillaBlocks[187] = null;
+        vanillaBlocks[188] = null;
+        vanillaBlocks[189] = null;
+        vanillaBlocks[190] = null;
+        vanillaBlocks[191] = null;
+        vanillaBlocks[192] = null;
+        vanillaBlocks[193] = null;
+        vanillaBlocks[194] = null;
+        vanillaBlocks[195] = null;
+        vanillaBlocks[196] = null;
+        vanillaBlocks[197] = null;
+        vanillaBlocks[198] = null;
+        vanillaBlocks[199] = null;
+        vanillaBlocks[200] = null;
+        vanillaBlocks[201] = null;
+        vanillaBlocks[202] = null;
+        vanillaBlocks[203] = null;
+        vanillaBlocks[204] = null;
+        vanillaBlocks[205] = null;
+        vanillaBlocks[206] = null;
+        vanillaBlocks[207] = null;
+        vanillaBlocks[208] = null;
+        vanillaBlocks[209] = null;
+        vanillaBlocks[210] = null;
+        vanillaBlocks[211] = null;
+        vanillaBlocks[212] = null;
+        vanillaBlocks[213] = null;
+        vanillaBlocks[214] = null;
+        vanillaBlocks[215] = null;
+        vanillaBlocks[216] = null;
+        vanillaBlocks[217] = null;
+        vanillaBlocks[218] = null;
+        vanillaBlocks[219] = null;
+        vanillaBlocks[220] = null;
+        vanillaBlocks[221] = null;
+        vanillaBlocks[222] = null;
+        vanillaBlocks[223] = null;
+        vanillaBlocks[224] = null;
+        vanillaBlocks[225] = null;
+        vanillaBlocks[226] = null;
+        vanillaBlocks[227] = null;
+        vanillaBlocks[228] = null;
+        vanillaBlocks[229] = null;
+        vanillaBlocks[230] = null;
+        vanillaBlocks[231] = null;
+        vanillaBlocks[232] = null;
+        vanillaBlocks[233] = null;
+        vanillaBlocks[234] = null;
+        vanillaBlocks[235] = null;
+        vanillaBlocks[236] = null;
+        vanillaBlocks[237] = null;
+        vanillaBlocks[238] = null;
+        vanillaBlocks[239] = null;
+        vanillaBlocks[240] = null;
+        vanillaBlocks[241] = null;
+        vanillaBlocks[242] = null;
+        vanillaBlocks[243] = null;
+        vanillaBlocks[244] = null;
+        vanillaBlocks[245] = null;
+        vanillaBlocks[246] = null;
+        vanillaBlocks[247] = null;
+        vanillaBlocks[248] = null;
+        vanillaBlocks[249] = null;
+        vanillaBlocks[250] = null;
+        vanillaBlocks[251] = null;
+        vanillaBlocks[252] = null;
+        vanillaBlocks[253] = null;
+        vanillaBlocks[254] = null;
+        vanillaBlocks[255] = null;
 
         loadStructures(new File("Placemod/Schematics/"));
 
