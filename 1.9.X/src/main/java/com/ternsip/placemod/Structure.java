@@ -2,6 +2,8 @@ package com.ternsip.placemod;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.monster.EntityGolem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -9,8 +11,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -18,6 +22,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 
 import java.io.File;
@@ -184,8 +189,16 @@ public class Structure {
         if (Decorator.preventCommandBlock) {
             blockReplaces[Block.getIdFromBlock(Blocks.command_block)] = Block.getIdFromBlock(Blocks.mossy_cobblestone);
         }
+        if (Decorator.preventMobSpawners) {
+            blockReplaces[Block.getIdFromBlock(Blocks.mob_spawner)] = Block.getIdFromBlock(Blocks.mossy_cobblestone);
+        }
 
         double lootChance = Decorator.lootChance;
+        String[] mobs = new String[]{"Enderman", "CaveSpider", "Chicken", "Creeper",
+                "Witch", "Slime", "Spider", "Sheep", "Blaze", "Bat", "PigZombie",
+                "Ghast", "Cow", "SnowMan", "LavaSlime", "Zombie", "Skeleton", "Pig"};
+
+        Block[] vanillaBlocks = Decorator.vanillaBlocks;
 
         // getStateFromMeta -> IllegalArgumentException
         for (int y = 0, index = 0; y < height; ++y) {
@@ -199,10 +212,14 @@ public class Structure {
                         continue;
                     }
                     int blockID = blocks[index];
+                    Block block = null;
                     if (blockID > 0 && blockID < 256) {
                         blockID = blockReplaces[blockID];
+                        block = vanillaBlocks[blockID];
                     }
-                    Block block = Block.getBlockById(blockID);
+                    if (block == null) {
+                        block = Block.getBlockById(blockID);
+                    }
                     int meta = posture.getWorldMeta(block, blocksMetadata[index]);
                     IBlockState state = block.getStateFromMeta(meta);
                     int rx = blockPos.getX() - startChunkX * 16;
@@ -219,10 +236,16 @@ public class Structure {
                     //chunk.setModified(true);
                     //world.setBlockState(blockPos, state, 2);
                     TileEntity blockTile = world.getTileEntity(blockPos);
-                    if (blockTile != null && blockTile instanceof TileEntityChest && lootChance >= random.nextDouble()) {
-                        TileEntityChest chest = (TileEntityChest) blockTile;
-                        int id = Math.abs(random.nextInt() % lootTables.size());
-                        chest.setLoot(lootTables.get(id), random.nextLong());
+                    if (blockTile != null) {
+                        if (blockTile instanceof TileEntityChest && lootChance >= random.nextDouble()) {
+                            TileEntityChest chest = (TileEntityChest) blockTile;
+                            int id = Math.abs(random.nextInt() % lootTables.size());
+                            chest.setLoot(lootTables.get(id), random.nextLong());
+                        }
+                        if (blockTile instanceof TileEntityMobSpawner) {
+                            TileEntityMobSpawner spawner = (TileEntityMobSpawner) blockTile;
+                            spawner.getSpawnerBaseLogic().setEntityName(mobs[Math.abs(random.nextInt()) % mobs.length]);
+                        }
                     }
                 }
             }
@@ -250,6 +273,7 @@ public class Structure {
         }
 
         /* Spawn entities */
+
 
     }
 
