@@ -77,13 +77,26 @@ class Posture {
         int mask = Directions.getMask(blockType);
         int overlap = (meta & mask) ^ meta;
         int direction = Directions.getDirection(meta & mask, blockType);
+        /* Rotation counter-clockwise */
         int[] rotationsY = {Directions.EAST, Directions.NORTH, Directions.WEST, Directions.SOUTH};
         /* ADD X rotations */
         /* ADD Z rotations */
         /* ADD Y flip */
         int rotY = rotateY;
-        rotY += (flipX && (direction == Directions.WEST || direction == Directions.EAST)) ? 2 : 0;
-        rotY += (flipZ && (direction == Directions.SOUTH || direction == Directions.NORTH)) ? 2 : 0;
+        boolean zAxis = (direction == Directions.SOUTH || direction == Directions.NORTH);
+        boolean xAxis = (direction == Directions.WEST || direction == Directions.EAST);
+        if (Directions.isDoubleDirected(blockType)) {
+            /* Always should be directed clockwise */
+            if (flipX && flipZ) {
+                rotY += 2;
+            } else {
+                rotY += flipX ? zAxis ? 1 : -1 : 0;
+                rotY += flipZ ? xAxis ? 1 : -1 : 0;
+            }
+        } else {
+            rotY += (flipX && xAxis) ? 2 : 0;
+            rotY += (flipZ && zAxis) ? 2 : 0;
+        }
         rotY = (4 + rotY % 4) % 4;
         if (direction == Directions.EAST) {
             return Directions.getMeta(meta, rotationsY[rotY % 4], blockType) | overlap;
