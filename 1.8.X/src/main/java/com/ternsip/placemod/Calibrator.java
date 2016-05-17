@@ -128,12 +128,12 @@ public class Calibrator {
         if (floating) {
             sy += 8 + height + random.nextInt() % (height / 2);
         } else if (underground) {
-            sy = 30 + random.nextInt() % 25;
+            sy = Math.max(2, Math.min(sy - height, 30 + random.nextInt() % 25));
         } else {
             sy -= lift;
             sy += Decorator.forceLift;
         }
-        if (sy < 4 || sy > 250) {
+        if (sy < 2 || sy > 250) {
             throw new IOException("Abnormal height: " + sy);
         }
         return sy;

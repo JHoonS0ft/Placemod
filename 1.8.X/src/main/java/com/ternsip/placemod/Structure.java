@@ -72,7 +72,9 @@ public class Structure {
         String path = schematicFile.getPath().toLowerCase().replace("\\", "/").replace("//", "/");
         flags.setString("Method", "Common");
         if (path.contains("/underground/")) flags.setString("Method", "Underground");
-        if (path.contains("/village/")) flags.setString("Method", "Village");
+        if (    path.contains("/village/") ||
+                path.contains("/town/") ||
+                path.contains("/villa/")) flags.setString("Method", "Village");
         if (path.contains("/floating/")) flags.setString("Method", "Floating");
         if (path.contains("/water/")) flags.setString("Method", "Water");
         if (path.contains("/underwater/")) flags.setString("Method", "Underwater");
@@ -184,6 +186,7 @@ public class Structure {
                 "Ghast", "Cow", "SnowMan", "LavaSlime", "Zombie", "Skeleton", "Pig"};
 
         Block[] vanillaBlocks = Decorator.vanillaBlocks;
+        boolean allowOnlyVanillaBlocks = Decorator.allowOnlyVanillaBlocks;
 
         for (int y = 0, index = 0; y < height; ++y) {
             for (int z = 0; z < length; ++z) {
@@ -202,10 +205,14 @@ public class Structure {
                         block = vanillaBlocks[blockID];
                     }
                     if (block == null) {
+                        if (allowOnlyVanillaBlocks) {
+                            continue;
+                        }
                         block = Block.getBlockById(blockID);
                     }
                     int meta = posture.getWorldMeta(block, blocksMetadata[index]);
-                    IBlockState state = block.getStateFromMeta(meta);
+                    IBlockState state = block.getDefaultState();
+                    try { state = block.getStateFromMeta(meta); } catch (IllegalArgumentException ignore) {}
                     int rx = blockPos.getX() - startChunkX * 16;
                     int ry = blockPos.getY();
                     int rz = blockPos.getZ() - startChunkZ * 16;

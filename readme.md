@@ -28,6 +28,7 @@ Relocated configuration file, now config locates in config/placemod.cfg.
 Fixed null pointer exception rises when world won't generate chunk.
 Changed spawn rarity to 0.005.
 Improved structure skinning. 
+
 Version 2.1 Major Update:
 Assigned individual cluster/structure  rarity for each biome type.
 Add saturation function ratios to config.
@@ -42,6 +43,20 @@ preventCommandBlock - Prevent command block for spawning
 roughnessFactor - Multiplier of minimal acceptable roughness
 lootChance - Chest loot chance [0..1]
 forceLift - Pull out structure from the ground and lift up (recommended 0)
+
+Version 3.2:
+Now mob spawners appears with random mob inside cage (not only pigs).
+Add function to disable mob spawners.
+Fixed mushroom rotation bug. Now mushroom cap blocks puts correctly.
+Fixed rails and portals metadata rotation bugs.
+Added block-id disentanglement vanilla blocks to reveal appropriate schematic block.
+
+
+Version 3.3
+underground becomes fully underground
+add vanilla only blocks options
+villa, town now spawns villagers
+fix illegal argument block state exception
 
 
 

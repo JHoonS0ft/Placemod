@@ -29,6 +29,7 @@ public class Decorator implements IWorldGenerator {
     static double lootChance = 0.25; // Chest loot chance [0..1]
     static int forceLift = 0; // Pull out structure from the ground and lift up (recommended 0)
     static boolean preventMobSpawners = false; // Prevent mobspawners for spawning
+    static boolean allowOnlyVanillaBlocks = true; // Allow only vanilla blocks to spawn
     static boolean[] soil = new boolean[256]; // Ground soil blocks
     static boolean[] overlook = new boolean[256]; // Plants, stuff, web, fire, decorative, etc.
     static boolean[] liquid = new boolean[256]; // Liquid blocks
@@ -54,6 +55,7 @@ public class Decorator implements IWorldGenerator {
                 lootChance = Double.parseDouble(config.getProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance)));
                 forceLift = (int) Double.parseDouble(config.getProperty("FORCE_LIFT", Double.toString(forceLift)));
                 preventMobSpawners = Boolean.parseBoolean(config.getProperty("PREVENT_MOB_SPAWNERS", Boolean.toString(preventMobSpawners)));
+                allowOnlyVanillaBlocks = Boolean.parseBoolean(config.getProperty("ALLOW_ONLY_VANILLA_BLOCKS", Boolean.toString(allowOnlyVanillaBlocks)));
                 fis.close();
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -71,6 +73,7 @@ public class Decorator implements IWorldGenerator {
             config.setProperty("CHEST_LOOT_CHANCE", Double.toString(lootChance));
             config.setProperty("FORCE_LIFT", Integer.toString(forceLift));
             config.setProperty("PREVENT_MOB_SPAWNERS", Boolean.toString(preventMobSpawners));
+            config.setProperty("ALLOW_ONLY_VANILLA_BLOCKS", Boolean.toString(allowOnlyVanillaBlocks));
             config.store(fos, null);
             fos.close();
         } catch (IOException ioe) {
