@@ -260,6 +260,7 @@ public class Decorator implements IWorldGenerator {
                         possibles.put(ico, meta);
                     }
                 } catch (ArrayIndexOutOfBoundsException ignored) {}
+                catch (NullPointerException ignored) {}
             }
             for (Map.Entry<IIcon, Integer> entry : possibles.entrySet()) {
                 int meta = entry.getValue();
