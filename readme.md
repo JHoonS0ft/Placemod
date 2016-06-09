@@ -58,5 +58,10 @@ add vanilla only blocks options
 villa, town now spawns villagers
 fix illegal argument block state exception
 
+Version 3.4
+Fixed underwater floodfill
+Fixed structures dirt/stone floodfill
+Add new chest loot control for 1.7.x 1.8.x
+
 
 

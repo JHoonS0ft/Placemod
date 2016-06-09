@@ -216,7 +216,8 @@ public class Structure {
                     }
                     int blockID = blocks[index];
                     Block block = null;
-                    if (blockID > 0 && blockID < 256) {
+                    int meta = 0;
+                    if (blockID >= 0 && blockID < 256) {
                         blockID = blockReplaces[blockID];
                         block = vanillaBlocks[blockID];
                     }
@@ -225,8 +226,9 @@ public class Structure {
                             continue;
                         }
                         block = Block.getBlockById(blockID);
+                    } else {
+                        meta = posture.getWorldMeta(block, blocksMetadata[index]);
                     }
-                    int meta = posture.getWorldMeta(block, blocksMetadata[index]);
                     IBlockState state = block.getDefaultState();
                     try { state = block.getStateFromMeta(meta); } catch (IllegalArgumentException ignore) {}
                     int rx = blockPos.getX() - startChunkX * 16;

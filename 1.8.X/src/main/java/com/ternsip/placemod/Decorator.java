@@ -3,11 +3,17 @@ package com.ternsip.placemod;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.registry.GameData;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,10 +32,13 @@ public class Decorator implements IWorldGenerator {
     static boolean balanceMode = true; // Replace rich blocks to poor
     static boolean preventCommandBlock = false; // Prevent command block for spawning
     static double roughnessFactor = 1.0; // Multiplier of minimal acceptable roughness
-    static double lootChance = 0.25; // Chest loot chance [0..1]
+    static double lootChance = 0.75; // Chest loot chance [0..1]
     static int forceLift = 0; // Pull out structure from the ground and lift up (recommended 0)
     static boolean preventMobSpawners = false; // Prevent mobspawners for spawning
     static boolean allowOnlyVanillaBlocks = true; // Allow only vanilla blocks to spawn
+    static int minChestItems = 2; // Min number of stack per chest inclusive
+    static int maxChestItems = 7; // Max number of stacks per chest exclusive
+    static int maxChestStackSize = 3; // Max item stack size for chest loot
     static boolean[] soil = new boolean[256]; // Ground soil blocks
     static boolean[] overlook = new boolean[256]; // Plants, stuff, web, fire, decorative, etc.
     static boolean[] liquid = new boolean[256]; // Liquid blocks
@@ -56,6 +65,9 @@ public class Decorator implements IWorldGenerator {
                 forceLift = (int) Double.parseDouble(config.getProperty("FORCE_LIFT", Double.toString(forceLift)));
                 preventMobSpawners = Boolean.parseBoolean(config.getProperty("PREVENT_MOB_SPAWNERS", Boolean.toString(preventMobSpawners)));
                 allowOnlyVanillaBlocks = Boolean.parseBoolean(config.getProperty("ALLOW_ONLY_VANILLA_BLOCKS", Boolean.toString(allowOnlyVanillaBlocks)));
+                minChestItems = (int) Double.parseDouble(config.getProperty("MIN_CHEST_ITEMS", Double.toString(minChestItems)));
+                maxChestItems = (int) Double.parseDouble(config.getProperty("MAX_CHEST_ITEMS", Double.toString(maxChestItems)));
+                maxChestStackSize = (int) Double.parseDouble(config.getProperty("MAX_CHEST_STACK_SIZE", Double.toString(maxChestStackSize)));
                 fis.close();
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -74,6 +86,9 @@ public class Decorator implements IWorldGenerator {
             config.setProperty("FORCE_LIFT", Integer.toString(forceLift));
             config.setProperty("PREVENT_MOB_SPAWNERS", Boolean.toString(preventMobSpawners));
             config.setProperty("ALLOW_ONLY_VANILLA_BLOCKS", Boolean.toString(allowOnlyVanillaBlocks));
+            config.setProperty("MIN_CHEST_ITEMS", Integer.toString(minChestItems));
+            config.setProperty("MAX_CHEST_ITEMS", Integer.toString(maxChestItems));
+            config.setProperty("MAX_CHEST_STACK_SIZE", Integer.toString(maxChestStackSize));
             config.store(fos, null);
             fos.close();
         } catch (IOException ioe) {
@@ -229,6 +244,19 @@ public class Decorator implements IWorldGenerator {
                         .print();
             }
         }
+    }
+
+    private static void bindHooks() {
+        ChestGenHooks hooks = ChestGenHooks.getInfo("Placemod");
+        for (ResourceLocation itemName : GameData.getItemRegistry().getKeys()) {
+            Item item = Item.itemRegistry.getObject(itemName);
+            int maxDmg = item.getMaxDamage();
+            for (int meta = 0; meta <= maxDmg; ++meta) {
+                hooks.addItem(new WeightedRandomChestContent(new ItemStack(item, 1, meta), 1, maxChestStackSize, 256 / (1 + maxDmg)));
+            }
+        }
+        hooks.setMin(minChestItems);
+        hooks.setMax(maxChestItems);
     }
 
     static {
@@ -532,6 +560,8 @@ public class Decorator implements IWorldGenerator {
         vanillaBlocks[255] = null;
 
         loadStructures(new File("Placemod/Schematics/"));
+
+        bindHooks();
 
     }
 

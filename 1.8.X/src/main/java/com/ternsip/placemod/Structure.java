@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -137,6 +138,8 @@ public class Structure {
             lootTables.add(ChestGenHooks.getInfo(ChestGenHooks.PYRAMID_DESERT_CHEST));
         }
 
+        ChestGenHooks placemodGenHooks = ChestGenHooks.getInfo("Placemod");
+
         /* Paste */
         int width = posture.getWidth();
         int height = posture.getHeight();
@@ -200,7 +203,8 @@ public class Structure {
                     }
                     int blockID = blocks[index];
                     Block block = null;
-                    if (blockID > 0 && blockID < 256) {
+                    int meta = 0;
+                    if (blockID >= 0 && blockID < 256) {
                         blockID = blockReplaces[blockID];
                         block = vanillaBlocks[blockID];
                     }
@@ -209,8 +213,9 @@ public class Structure {
                             continue;
                         }
                         block = Block.getBlockById(blockID);
+                    } else {
+                        meta = posture.getWorldMeta(block, blocksMetadata[index]);
                     }
-                    int meta = posture.getWorldMeta(block, blocksMetadata[index]);
                     IBlockState state = block.getDefaultState();
                     try { state = block.getStateFromMeta(meta); } catch (IllegalArgumentException ignore) {}
                     int rx = blockPos.getX() - startChunkX * 16;
@@ -228,9 +233,8 @@ public class Structure {
                     //world.setBlockState(blockPos, state, 2);
                     TileEntity blockTile = world.getTileEntity(blockPos);
                     if (blockTile != null) {
-                        if (blockTile instanceof TileEntityChest && lootChance >= random.nextDouble()) {
-                            ChestGenHooks info = lootTables.get(Math.abs(random.nextInt() % lootTables.size()));
-                            WeightedRandomChestContent.generateChestContents(random, info.getItems(random), (TileEntityChest) blockTile, info.getCount(random));
+                        if (blockTile instanceof IInventory && lootChance >= random.nextDouble()) {
+                            WeightedRandomChestContent.generateChestContents(random, placemodGenHooks.getItems(random), (IInventory) blockTile, placemodGenHooks.getCount(random));
                         }
                         if (blockTile instanceof TileEntityMobSpawner) {
                             TileEntityMobSpawner spawner = (TileEntityMobSpawner) blockTile;
