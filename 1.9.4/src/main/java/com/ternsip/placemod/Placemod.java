@@ -1,10 +1,9 @@
 package com.ternsip.placemod;
 
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.common.registry.GameRegistry;
 
 /* Main mod class. Forge will handle all registered events. */
 @Mod(   modid = Placemod.MODID,
@@ -15,10 +14,9 @@ public class Placemod {
 
     static final String MODID = "placemod";
     static final String MODNAME = "Placemod";
-    static final String VERSION = "3.5";
+    static final String VERSION = "3.4";
     public static final String AUTHOR = "Ternsip";
-    public static final String MCVERSION = "1.7.*";
-
+    public static final String MCVERSION = "1.9.*";
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)
