@@ -257,18 +257,9 @@ public class Decorator implements IWorldGenerator {
         ChestGenHooks hooks = ChestGenHooks.getInfo("Placemod");
         for (Object itemName : GameData.getItemRegistry().getKeys()) {
             Item item = (Item) Item.itemRegistry.getObject(itemName);
-            HashMap<IIcon, Integer> possibles = new HashMap<IIcon, Integer>();
-            for (int meta = 255; meta >= 0; --meta) {
-                try {
-                    IIcon ico = item.getIconFromDamage(meta);
-                    if (ico != null) {
-                        possibles.put(ico, meta);
-                    }
-                } catch (Exception ignored) {}
-            }
-            for (Map.Entry<IIcon, Integer> entry : possibles.entrySet()) {
-                int meta = entry.getValue();
-                hooks.addItem(new WeightedRandomChestContent(new ItemStack(item, 1, meta), 1, maxChestStackSize, 256 / possibles.size()));
+            int maxMeta = item.getMaxDamage();
+            for (int meta = 0; meta <= maxMeta; ++meta) {
+                hooks.addItem(new WeightedRandomChestContent(new ItemStack(item, 1, meta), 1, maxChestStackSize, 256 / (maxMeta + 1)));
             }
         }
         hooks.setMin(minChestItems);
