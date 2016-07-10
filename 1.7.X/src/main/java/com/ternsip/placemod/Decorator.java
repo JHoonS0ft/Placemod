@@ -41,6 +41,7 @@ public class Decorator implements IWorldGenerator {
     static int minChestItems = 2; // Min number of stack per chest inclusive
     static int maxChestItems = 7; // Max number of stacks per chest exclusive
     static int maxChestStackSize = 3; // Max item stack size for chest loot
+    static boolean loadOutput = true; // Prints load output to console
     static boolean[] soil = new boolean[256]; // Ground soil blocks
     static boolean[] overlook = new boolean[256]; // Plants, stuff, web, fire, decorative, etc.
     static boolean[] liquid = new boolean[256]; // Liquid blocks
@@ -70,6 +71,7 @@ public class Decorator implements IWorldGenerator {
                 minChestItems = (int) Double.parseDouble(config.getProperty("MIN_CHEST_ITEMS", Double.toString(minChestItems)));
                 maxChestItems = (int) Double.parseDouble(config.getProperty("MAX_CHEST_ITEMS", Double.toString(maxChestItems)));
                 maxChestStackSize = (int) Double.parseDouble(config.getProperty("MAX_CHEST_STACK_SIZE", Double.toString(maxChestStackSize)));
+                loadOutput = Boolean.parseBoolean(config.getProperty("LOAD_OUTPUT", Boolean.toString(loadOutput)));
                 fis.close();
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -91,6 +93,7 @@ public class Decorator implements IWorldGenerator {
             config.setProperty("MIN_CHEST_ITEMS", Integer.toString(minChestItems));
             config.setProperty("MAX_CHEST_ITEMS", Integer.toString(maxChestItems));
             config.setProperty("MAX_CHEST_STACK_SIZE", Integer.toString(maxChestStackSize));
+            config.setProperty("LOAD_OUTPUT", Boolean.toString(loadOutput));
             config.store(fos, null);
             fos.close();
         } catch (IOException ioe) {
@@ -130,13 +133,15 @@ public class Decorator implements IWorldGenerator {
                         int width = structure.flags.getShort("Width");
                         int height = structure.flags.getShort("Height");
                         int length = structure.flags.getShort("Length");
-                        new Report()
-                                .add("LOAD", file.getPath())
-                                .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]")
-                                .add("LIFT", String.valueOf(structure.flags.getInteger("Lift")))
-                                .add("METHOD", structure.flags.getString("Method"))
-                                .add("BIOME", Biome.Style.valueOf(structure.flags.getInteger("Biome")).name)
-                                .print();
+                        if (loadOutput) {
+                            new Report()
+                                    .add("LOAD", file.getPath())
+                                    .add("SIZE", "[W=" + width + ";H=" + height + ";L=" + length + "]")
+                                    .add("LIFT", String.valueOf(structure.flags.getInteger("Lift")))
+                                    .add("METHOD", structure.flags.getString("Method"))
+                                    .add("BIOME", Biome.Style.valueOf(structure.flags.getInteger("Biome")).name)
+                                    .print();
+                        }
                     } catch (IOException ioe) {
                         new Report()
                                 .add("CAN'T LOAD SCHEMATIC", file.getPath())
@@ -259,9 +264,7 @@ public class Decorator implements IWorldGenerator {
                     if (ico != null) {
                         possibles.put(ico, meta);
                     }
-                } catch (ArrayIndexOutOfBoundsException ignored) {}
-                catch (NullPointerException ignored) {}
-                catch (NoSuchMethodError ignored) {}
+                } catch (Exception ignored) {}
             }
             for (Map.Entry<IIcon, Integer> entry : possibles.entrySet()) {
                 int meta = entry.getValue();

@@ -64,4 +64,7 @@ Fixed structures dirt/stone floodfill
 Add new chest loot control for 1.7.x 1.8.x
 
 
-
+Version 3.6
+Add config function LOAD_OUTPUT to disable console load output
+Small fix for 1.7.10 with icons
+Add support for 1.10.2
