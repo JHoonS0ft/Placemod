@@ -14,9 +14,9 @@ public class Placemod {
 
     static final String MODID = "placemod";
     static final String MODNAME = "Placemod";
-    static final String VERSION = "3.6";
+    static final String VERSION = "3.7";
     public static final String AUTHOR = "Ternsip";
-    public static final String MCVERSION = "1.9.*";
+    public static final String MCVERSION = "1.9.4";
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event)

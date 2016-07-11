@@ -68,3 +68,7 @@ Version 3.6
 Add config function LOAD_OUTPUT to disable console load output
 Small fix for 1.7.10 with icons
 Add support for 1.10.2
+
+Version 3.7
+Add config function to control allowed dimensions
+Add support for 1.10

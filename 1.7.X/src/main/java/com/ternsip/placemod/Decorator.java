@@ -42,6 +42,8 @@ public class Decorator implements IWorldGenerator {
     static int maxChestItems = 7; // Max number of stacks per chest exclusive
     static int maxChestStackSize = 3; // Max item stack size for chest loot
     static boolean loadOutput = true; // Prints load output to console
+    static ArrayList<Integer> allowedDimensions = new ArrayList<Integer>() {
+        {add(-1); add(0); add(1);}}; // Allow spawning structures only in dimensions with given ids
     static boolean[] soil = new boolean[256]; // Ground soil blocks
     static boolean[] overlook = new boolean[256]; // Plants, stuff, web, fire, decorative, etc.
     static boolean[] liquid = new boolean[256]; // Liquid blocks
@@ -72,6 +74,7 @@ public class Decorator implements IWorldGenerator {
                 maxChestItems = (int) Double.parseDouble(config.getProperty("MAX_CHEST_ITEMS", Double.toString(maxChestItems)));
                 maxChestStackSize = (int) Double.parseDouble(config.getProperty("MAX_CHEST_STACK_SIZE", Double.toString(maxChestStackSize)));
                 loadOutput = Boolean.parseBoolean(config.getProperty("LOAD_OUTPUT", Boolean.toString(loadOutput)));
+                allowedDimensions = stringToArray(config.getProperty("ALLOWED_DIMENSIONS", "-1, 0, 1"));
                 fis.close();
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -94,11 +97,28 @@ public class Decorator implements IWorldGenerator {
             config.setProperty("MAX_CHEST_ITEMS", Integer.toString(maxChestItems));
             config.setProperty("MAX_CHEST_STACK_SIZE", Integer.toString(maxChestStackSize));
             config.setProperty("LOAD_OUTPUT", Boolean.toString(loadOutput));
+            config.setProperty("ALLOWED_DIMENSIONS", arrayToString(allowedDimensions));
             config.store(fos, null);
             fos.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+    }
+
+    private static ArrayList<Integer> stringToArray(String array) {
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        for(String stringValue : Arrays.asList(array.split("\\s*,\\s*"))) {
+            try {result.add(Integer.parseInt(stringValue));} catch(NumberFormatException ignored) {}
+        }
+        return result;
+    }
+
+    private static String arrayToString(ArrayList<Integer> array) {
+        String result = "";
+        for(Integer integerValue : array) {
+            result += (result.isEmpty() ? "": ", ") + integerValue.toString();
+        }
+        return result;
     }
 
     private static void loadStructures(File folder) {
@@ -160,6 +180,9 @@ public class Decorator implements IWorldGenerator {
                 .add("LOADED CLUSTERS", String.valueOf(clusters.size()))
                 .add("LOADED SCHEMATICS", String.valueOf(loaded))
                 .add("LOAD TIME", new DecimalFormat("###0.00").format(loadTime / 1000.0) + "s")
+                .print();
+        new Report()
+                .add("POSSIBLE_DIMENSIONS", arrayToString(allowedDimensions))
                 .print();
     }
 
