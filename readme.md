@@ -72,3 +72,6 @@ Add support for 1.10.2
 Version 3.7
 Add config function to control allowed dimensions
 Add support for 1.10
+
+Version 3.8
+Fixed dimension protect ignore bug

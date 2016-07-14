@@ -188,6 +188,9 @@ public class Decorator implements IWorldGenerator {
 
     @Override
     public void generate(Random randomDefault, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) {
+        if (!allowedDimensions.contains(world.provider.getDimension())) {
+            return; // Dimension with given id is not allowed
+        }
         Random random = getRandom(world.getSeed(), chunkX, chunkZ);
         int drops = (int) density + (random.nextDouble() <= (density - (int) density) ? 1 : 0);
         BiomeGenBase biome = world.getBiomeGenForCoords(new BlockPos(chunkX * 16, 64, chunkZ * 16));
